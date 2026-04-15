@@ -93,12 +93,46 @@
                     $erroPreenchimento = true;
                 }
             }
+            //Início da validação do campo fotoUsuario 
+            $diretorio = "assets/img/"; //Define para qual diretório as imagens serão movidas
+            $fotoUsuario = $diretorio . basename($_FILES['fotoUsuario']['name']); //montar o nome a ser salvo do BD (assets/img/nome.jpg)
+            $tipoDaImagem = strtolower(pathinfo($fotoUsuario, PATHINFO_EXTENSION));//Pega a extensão da imagem convertida em letras minúsculas
+            $erroUpload = false; //Variável para controle de erro no upload da foto
+
+            //Verifica se o tamanho do arquivo é diferente de 0
+            if($_FILES['fotoUsuario']['size'] != 0){
+                //Inicia a validação do arquivo fotoUsuario
+
+                //Verifica se o tamanho da foto é maior do que 5MegaBytes  (5000000 bytes)
+                if($_FILES['fotoUsuario']['size'] >5000000){
+                echo "<div class='alert alert-warning text-center'>A <strong>FOTO</strong> deve ser menor que 5MB!</div>";
+                $erroUpload = true;    
+                }
+                //Verificar se a foto está nos formatos jpg, jpeg, png ou webp
+                if ($tipoDaImagem != "jpg" && $tipoDaImagem != "jpeg" && $tipoDaImagem != "png" && $tipoDaImagem != "webp"){
+                    echo "<div class='alert alert-warning text-center'>A <strong>FOTO</strong> deve estar no formato JPG, JPEG, PNG ou WEBP!</div>";
+                    $erroUpload = true;   
+                }
+
+                //Verifica se a foto foi movida para op diretório (assets/img/), utilizando a função move_uploadf_file()
+                if(!move_uploaded_file($_FILES["fotoUsuario"]["tmp_name"], $fotoUsuario)){
+                    echo "<div class='alert alert-danger text-center'>Erro ao tentar mover a foto para o <strong>DIRETÓRIO</strong> !</div>";
+                    $erroUpload = true;   
+                }
+            }
+            else{
+                echo "<div class='alert alert-warning text-center'>A <strong>FOTO</strong> é obrigatória!</div>";
+                    $erroUpload = true;
+            }
 
             //Verifica se não há erro de preenchimento
-            if (!$erroPreenchimento){
+            if (!$erroPreenchimento && !$erroUpload){
                 echo "<div class='alert alert-success text-center'> O cadastro do <strong>USUÁRIO</strong> foi efetuado com sucesso!</div>";
                 echo "
                     <div class='container mb-3 mt-3'>
+                        <div class='container mb-3 mt-3 text-center'>
+                            <img src='$fotoUsuario' title='Foto de $nomeUsuario' style='width:150px' class='img-thumbnail'>
+                        </div>
                         <table class='table'>
                             <tr>
                                 <th>NOME</th>
