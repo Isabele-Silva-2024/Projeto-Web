@@ -1,4 +1,5 @@
 <?php include "header.php" ?>
+    
     <div class="d-flex justify-content-center mb-3">
         <h2>Cadastre-se:</h2>
     </div>

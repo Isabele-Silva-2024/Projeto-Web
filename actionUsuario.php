@@ -17,6 +17,12 @@
             else{
                 //Se o $_POST["nomeUsuario"] não estiver vazio, é filtrado e armazenado na variável PHP
                 $nomeUsuario = filtrar_entrada($_POST["nomeUsuario"]);
+                
+                //Utiliza a função preg_match() para verificar se há apenas letras no nome
+                if(!preg_match('/^[\p{L} ]+$/u', $nomeUsuario)){
+                    echo "<div class='alert alert-warning text-center'>O campo <strong>NOME</strong> deve conter apenas letras!</div>";
+                    $erroPreenchimento = true;
+                }
             }
 
             //Validação do campo dataNascimentoUsuario
@@ -105,10 +111,10 @@
 
                 //Verifica se o tamanho da foto é maior do que 5MegaBytes  (5000000 bytes)
                 if($_FILES['fotoUsuario']['size'] >5000000){
-                echo "<div class='alert alert-warning text-center'>A <strong>FOTO</strong> deve ser menor que 5MB!</div>";
-                $erroUpload = true;    
+                    echo "<div class='alert alert-warning text-center'>A <strong>FOTO</strong> deve ser menor que 5MB!</div>";
+                    $erroUpload = true;    
                 }
-                //Verificar se a foto está nos formatos jpg, jpeg, png ou webp
+                //Verifica se a foto está nos formatos jpg, jpeg, png ou webp
                 if ($tipoDaImagem != "jpg" && $tipoDaImagem != "jpeg" && $tipoDaImagem != "png" && $tipoDaImagem != "webp"){
                     echo "<div class='alert alert-warning text-center'>A <strong>FOTO</strong> deve estar no formato JPG, JPEG, PNG ou WEBP!</div>";
                     $erroUpload = true;   
@@ -122,49 +128,62 @@
             }
             else{
                 echo "<div class='alert alert-warning text-center'>A <strong>FOTO</strong> é obrigatória!</div>";
-                    $erroUpload = true;
+                $erroUpload = true;
             }
 
             //Verifica se não há erro de preenchimento
             if (!$erroPreenchimento && !$erroUpload){
-                echo "<div class='alert alert-success text-center'> O cadastro do <strong>USUÁRIO</strong> foi efetuado com sucesso!</div>";
-                echo "
-                    <div class='container mb-3 mt-3'>
-                        <div class='container mb-3 mt-3 text-center'>
-                            <img src='$fotoUsuario' title='Foto de $nomeUsuario' style='width:150px' class='img-thumbnail'>
+
+                //Cria uma variável para armazenar a QUERY que realiza a inserção de dados na tabela Usuarios
+                $inserirUsuario = "INSERT INTO Usuarios (fotoUsuario, nomeUsuario, dataNascimentoUsuario, cidadeUsuario, emailUsuario, senhaUsuario) VALUES ('$fotoUsuario', '$nomeUsuario', '$dataNascimentoUsuario', '$cidadeUsuario', '$emailUsuario', '$senhaUsuario')";
+
+                //Inclui o arquivo de conexão com o Banco de Dados
+                include "conexaoBD.php";
+
+                //Usa a função mysqli_query() para executar a QUERY no Banco de Dados
+                //Se conseguir, exibe alerta de sucesso e tabela com os dados informados
+                if(mysqli_query($conn, $inserirUsuario)){
+
+                    echo "<div class='alert alert-success text-center'> O cadastro do <strong>USUÁRIO</strong> foi efetuado com sucesso!</div>";
+                    echo "
+                        <div class='container mb-3 mt-3'>
+                            <div class='container mb-3 mt-3 text-center'>
+                                <img src='$fotoUsuario' title='Foto de $nomeUsuario' style='width:150px' class='img-thumbnail'>
+                            </div>
+                            <table class='table'>
+                                <tr>
+                                    <th>NOME</th>
+                                    <td>$nomeUsuario</td>
+                                </tr>
+                                <tr>
+                                    <th>DATA DE NASCIMENTO</th>
+                                    <td>$diaNascimentoUsuario/$mesNascimentoUsuario/$anoNascimentoUsuario</td>
+                                </tr>
+                                <tr>
+                                    <th>CIDADE</th>
+                                    <td>$cidadeUsuario</td>
+                                </tr>
+                                <tr>
+                                    <th>EMAIL</th>
+                                    <td>$emailUsuario</td>
+                                </tr>
+                                <tr>
+                                    <th>SENHA</th>
+                                    <td>$senhaUsuario</td>
+                                </tr>
+                                <tr>
+                                    <th>CONFIRMAR SENHA</th>
+                                    <td>$confirmarSenhaUsuario</td>
+                                </tr>
+                            </table>
                         </div>
-                        <table class='table'>
-                            <tr>
-                                <th>NOME</th>
-                                <td>$nomeUsuario</td>
-                            </tr>
-                            <tr>
-                                <th>DATA DE NASCIMENTO</th>
-                                <td>$diaNascimentoUsuario/$mesNascimentoUsuario/$anoNascimentoUsuario</td>
-                            </tr>
-                            <tr>
-                                <th>CIDADE</th>
-                                <td>$cidadeUsuario</td>
-                            </tr>
-                            <tr>
-                                <th>EMAIL</th>
-                                <td>$emailUsuario</td>
-                            </tr>
-                            <tr>
-                                <th>SENHA</th>
-                                <td>$senhaUsuario</td>
-                            </tr>
-                            <tr>
-                                <th>CONFIRMAR SENHA</th>
-                                <td>$confirmarSenhaUsuario</td>
-                            </tr>
-                        </table>
-                    </div>
-                ";
+                    ";
+                }
+                else{
+                    echo "<div class='alert alert-danger text-center'> Erro ao tentar efetuar cadastro do <strong>USUÁRIO</strong>!</div>";
+                }
             }
-            else{
-                echo "<div class='alert alert-danger text-center'> Erro ao tentar efetuar cadastro do <strong>USUÁRIO</strong>!</div>";
-            }
+        
         }
         else{
             //Usar a função header() para redirecionar o usuário para o formulário.php          
